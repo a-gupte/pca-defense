@@ -203,8 +203,43 @@ def plot_logits(logits, logits_adv, n=5):
 	plt.show()
 	return [label_map[c] for c in result]
 
+# for i in range(4):
+# 	print(i)
+# 	logits = all_logits[i]
+# 	logits_adv = all_logits_adv[i]
+# 	print(plot_logits(logits, logits_adv))
+
+import spacy
+
+# want to show that for lower number of principal components, 
+nlp = spacy.load('en_core_web_md')
+pcs = 25
+
+def levenshteinDistance(s1, s2):
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]
+
 for i in range(4):
-	print(i)
-	logits = all_logits[i]
-	logits_adv = all_logits_adv[i]
-	print(plot_logits(logits, logits_adv))
+	# first few images indexed by i
+	predictions = all_predictions[i][::-1]
+	predictions_adv = all_predictions_adv[i][::-1]
+	# labeled_predictions = [label_map[c] for c in predictions]
+	# labeled_predictions_adv = [label_map[c] for c in predictions_adv]
+	# doc1 = nlp(' '.join(labeled_predictions[:pcs]))
+	# doc2 = nlp(' '.join(labeled_predictions_adv[:pcs])) 
+	# print(doc1.similarity(doc2)) # this might not be the best way to do it anyway!!
+	print('\n\n\n\n\n IMAGE # ', i)
+	for pcs in [5, 10, 20, 50, 100, 200, 224]:
+		print('\n\n #PCs ', pcs, '\n', predictions[:pcs], '\n', predictions_adv[:pcs])
+		print('edit distance: ', levenshteinDistance(predictions[:pcs], predictions_adv[:pcs])/pcs)
